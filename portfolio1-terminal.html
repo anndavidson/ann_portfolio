@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YourName :: Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00ff41;
+      --green-dim: #00aa2a;
+      --green-faint: rgba(0,255,65,0.07);
+      --bg: #0a0a0a;
+      --panel: #0d0d0d;
+      --border: #1a3a1a;
+      --text: #c8ffc8;
+      --muted: #4a7a4a;
+      --mono: 'Share Tech Mono', monospace;
+      --vt: 'VT323', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.6;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 18px; height: 18px;
+      border: 1px solid var(--green);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s;
+    }
+    .cursor-dot {
+      position: fixed;
+      width: 4px; height: 4px;
+      background: var(--green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    /* CRT flicker */
+    @keyframes flicker {
+      0%,100% { opacity:1; }
+      92% { opacity:1; }
+      93% { opacity:0.94; }
+      94% { opacity:1; }
+      96% { opacity:0.97; }
+    }
+    body { animation: flicker 8s infinite; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top:0; left:0; right:0;
+      z-index: 100;
+      padding: 0.8rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: var(--vt);
+      font-size: 1.6rem;
+      color: var(--green);
+    }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .nav-links a::before { content: '> '; color: var(--green-dim); }
+    .nav-links a:hover { color: var(--green); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .prompt-line {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+    .prompt-line span { color: var(--green); }
+
+    .hero-name {
+      font-family: var(--vt);
+      font-size: clamp(4rem, 10vw, 8rem);
+      color: var(--green);
+      line-height: 0.9;
+      text-shadow: 0 0 30px rgba(0,255,65,0.4);
+      margin: 0.5rem 0;
+    }
+
+    .typewriter {
+      font-size: 1rem;
+      color: var(--text);
+      margin: 1.5rem 0;
+      min-height: 1.6em;
+    }
+
+    .typewriter::after {
+      content: '█';
+      animation: blink 1s step-end infinite;
+      color: var(--green);
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .hero-desc {
+      color: var(--muted);
+      max-width: 550px;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      border-left: 2px solid var(--border);
+      padding-left: 1rem;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; }
+
+    .btn {
+      padding: 0.7rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-green {
+      background: transparent;
+      color: var(--green);
+      border: 1px solid var(--green);
+    }
+    .btn-green:hover {
+      background: var(--green-faint);
+      box-shadow: 0 0 15px rgba(0,255,65,0.2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+    /* ── Terminal window ── */
+    .terminal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+      max-width: 900px;
+      margin-left: auto; margin-right: auto;
+    }
+
+    .terminal-bar {
+      background: #111;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .t-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .t-red { background: #ff5f56; }
+    .t-yellow { background: #ffbd2e; }
+    .t-green2 { background: #27c93f; }
+
+    .terminal-title {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      line-height: 2;
+    }
+
+    .t-cmd { color: var(--green); }
+    .t-key { color: #88ccff; }
+    .t-val { color: var(--text); }
+    .t-comment { color: var(--muted); }
+    .t-bracket { color: #ffcc66; }
+
+    /* ── Sections ── */
+    section { padding: 5rem 2rem; max-width: 900px; margin: 0 auto; }
+
+    .sec-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .sec-num {
+      font-family: var(--vt);
+      font-size: 3rem;
+      color: var(--border);
+      line-height: 1;
+    }
+
+    .sec-title {
+      font-family: var(--vt);
+      font-size: 2.5rem;
+      color: var(--green);
+    }
+
+    /* ── Skills ── */
+    .skill-rows { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .skill-row { display: flex; align-items: center; gap: 1rem; }
+
+    .skill-name {
+      width: 140px;
+      color: var(--text);
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .skill-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      position: relative;
+    }
+
+    .skill-fill {
+      height: 100%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(0,255,65,0.5);
+      transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+      width: 0;
+    }
+    .skill-fill.animate { width: var(--w); }
+
+    .skill-pct {
+      width: 40px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    /* ── Projects ── */
+    .proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+
+    .proj-card {
+      background: var(--panel);
+      padding: 1.5rem;
+      transition: background 0.2s;
+    }
+    .proj-card:hover { background: var(--green-faint); }
+
+    .proj-id { color: var(--muted); font-size: 0.7rem; margin-bottom: 0.5rem; }
+
+    .proj-title {
+      font-family: var(--vt);
+      font-size: 1.6rem;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+
+    .proj-desc { color: var(--muted); font-size: 0.8rem; line-height: 1.7; margin-bottom: 1rem; }
+
+    .proj-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+
+    .stack-tag {
+      font-size: 0.68rem;
+      color: var(--green-dim);
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.5rem;
+    }
+
+    .proj-links { display: flex; gap: 1rem; }
+    .proj-links a {
+      color: var(--green);
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .proj-links a:hover { opacity: 0.7; }
+
+    /* ── Contact ── */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+
+    .f-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 0.3rem; display: block; }
+
+    .f-input, .f-textarea {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.7rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .f-input:focus, .f-textarea:focus { border-color: var(--green); }
+    .f-textarea { min-height: 100px; resize: vertical; }
+
+    .contact-side { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .c-item { border: 1px solid var(--border); padding: 1rem; }
+    .c-key { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em; }
+    .c-val { color: var(--green); font-size: 0.85rem; margin-top: 0.3rem; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    footer span { color: var(--green); }
+
+    /* ── Animations ── */
+    .fade-in { opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.5s; }
+    .fade-in.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<nav>
+  <div class="nav-logo">YourName</div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <p class="prompt-line"><span>~/portfolio</span> $ whoami</p>
+  <h1 class="hero-name">YOUR<br>NAME</h1>
+  <div class="typewriter" id="tw"></div>
+  <p class="hero-desc"> Currently a second year student and learning new things....</p>
+  <div class="hero-btns">
+    <a href="#projects" class="btn btn-green">./view_projects.sh</a>
+    <a href="#contact" class="btn btn-ghost">./contact.sh</a>
+  </div>
+</div>
+
+<!-- Terminal about block -->
+<div style="padding: 0 2rem; max-width: 900px; margin: 0 auto;" id="about">
+  <div class="terminal fade-in">
+    <div class="terminal-bar">
+      <div class="t-dot t-red"></div>
+      <div class="t-dot t-yellow"></div>
+      <div class="t-dot t-green2"></div>
+      <span class="terminal-title">about.json — bash</span>
+    </div>
+    <div class="terminal-body">
+      <span class="t-cmd">$ cat about.json</span><br>
+      <span class="t-bracket">{</span><br>
+      &nbsp;&nbsp;<span class="t-key">"name"</span>: <span class="t-val">"Ann Davidson"</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"role"</span>: <span class="t-val">"Student"</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"location"</span>: <span class="t-val">"Mumbai, India"</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"experience"</span>: <span class="t-val">"2 years of studying"</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"education"</span>: <span class="t-val">"B.E. Computer Engineering"</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"skills"</span>: <span class="t-bracket">[</span><span class="t-val">"React"</span>, <span class="t-val">"Node.js"</span>, <span class="t-val">"Python"</span>, <span class="t-val">"Java Programming"</span><span class="t-bracket">]</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"available"</span>: <span class="t-val" style="color:#00ff41">true</span>,<br>
+      &nbsp;&nbsp;<span class="t-key">"coffee_per_day"</span>: <span class="t-val" style="color:#ffcc66">3</span><br>
+      <span class="t-bracket">}</span><br><br>
+      <span class="t-comment"># Initializing developer profile... done ✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- Skills -->
+<section class="fade-in">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">./skills</h2>
+  </div>
+  <div class="skill-rows" id="skill-rows">
+    <div class="skill-row"><span class="skill-name">JavaScript</span><div class="skill-bar"><div class="skill-fill" style="--w:90%"></div></div><span class="skill-pct">90%</span></div>
+    <div class="skill-row"><span class="skill-name">React.js</span><div class="skill-bar"><div class="skill-fill" style="--w:85%"></div></div><span class="skill-pct">85%</span></div>
+    <div class="skill-row"><span class="skill-name">Node.js</span><div class="skill-bar"><div class="skill-fill" style="--w:80%"></div></div><span class="skill-pct">80%</span></div>
+    <div class="skill-row"><span class="skill-name">Python</span><div class="skill-bar"><div class="skill-fill" style="--w:75%"></div></div><span class="skill-pct">75%</span></div>
+    <div class="skill-row"><span class="skill-name">C Programming</span><div class="skill-bar"><div class="skill-fill" style="--w:70%"></div></div><span class="skill-pct">70%</span></div>
+    <div class="skill-row"><span class="skill-name">CSS</span><div class="skill-bar"><div class="skill-fill" style="--w:88%"></div></div><span class="skill-pct">88%</span></div>
+    <div class="skill-row"><span class="skill-name">Git & GitHub</span><div class="skill-bar"><div class="skill-fill" style="--w:92%"></div></div><span class="skill-pct">92%</span></div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects" class="fade-in">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">./projects</h2>
+  </div>
+  <div class="proj-grid">
+    <div class="proj-card">
+      <p class="proj-id">PROJECT_001</p>
+      <h3 class="proj-title">Student Performance Tracker</h3>
+      <p class="proj-desc">Student and Teacher Login,Student's Performance Report and Progress Report,Teachers being able to store the progress and marks of students and keep a track on their performance</p>
+      <div class="proj-stack"><span class="stack-tag">Java Programming</span><span class="stack-tag">HTML</span><span class="stack-tag">Python</span><span class="stack-tag">MySQL</span></div>
+      <div class="proj-links"><a href="#">[demo]</a><a href="#">[source]</a></div>
+    </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="fade-in">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">./contact</h2>
+  </div>
+  <div class="contact-grid">
+    <form class="contact-form" onsubmit="(e)=>e.preventDefault()">
+      <div><label class="f-label">NAME</label><input class="f-input" type="text" placeholder="Ann Davidson"/></div>
+      <div><label class="f-label">EMAIL</label><input class="f-input" type="email" placeholder="ann@gmail.com"/></div>
+      <div><label class="f-label">MESSAGE</label><textarea class="f-textarea" placeholder="Hello..."></textarea></div>
+      <button type="submit" class="btn btn-green" style="align-self:flex-start">./send_message.sh</button>
+    </form>
+    <div class="contact-side">
+      <div class="c-item"><p class="c-key">EMAIL</p><p class="c-val">your@email.com</p></div>
+      <div class="c-item"><p class="c-key">GITHUB</p><p class="c-val">github.com/yourusername</p></div>
+      <div class="c-item"><p class="c-key">LINKEDIN</p><p class="c-val">linkedin.com/in/yourprofile</p></div>
+      <div class="c-item"><p class="c-key">LOCATION</p><p class="c-val">Mumbai, Maharashtra, India</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2024 <span>YourName</span> — Deployed on <span>GitHub Pages</span> — All systems operational</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const dot = document.getElementById('cursor-dot');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    dot.style.left = e.clientX + 'px';
+    dot.style.top = e.clientY + 'px';
+  });
+
+  // Typewriter
+  const phrases = ['Currently a second year student, Worked on mini projects'];
+  let pi = 0, ci = 0, deleting = false;
+  const twEl = document.getElementById('tw');
+  function type() {
+    const word = phrases[pi];
+    twEl.textContent = deleting ? word.slice(0, ci--) : word.slice(0, ci++);
+    if (!deleting && ci > word.length) { deleting = true; setTimeout(type, 1200); return; }
+    if (deleting && ci < 0) { deleting = false; pi = (pi+1) % phrases.length; }
+    setTimeout(type, deleting ? 60 : 100);
+  }
+  type();
+
+  // Scroll animations
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // Skill bar animation
+  const skillObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.skill-fill').forEach(f => f.classList.add('animate'));
+        skillObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  const sr = document.getElementById('skill-rows');
+  if (sr) skillObs.observe(sr);
+</script>
+</body>
+</html>
