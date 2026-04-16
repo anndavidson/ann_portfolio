@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Name</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --white: #fafaf8;
+      --ink: #111108;
+      --stone: #5a5a55;
+      --dust: #b0afa8;
+      --whisper: #e8e8e2;
+      --accent: #c0451a;
+      --serif: 'Noto Serif JP', Georgia, serif;
+      --sans: 'Jost', sans-serif;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--white);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--dust); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border-bottom: 1px solid var(--whisper);
+    }
+
+    .nav-mark {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 200;
+      color: var(--ink);
+      letter-spacing: 0.12em;
+      text-decoration: none;
+    }
+
+    .nav-mark small {
+      display: block;
+      font-family: var(--sans);
+      font-size: 0.55rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-top: 0.1rem;
+    }
+
+    .nav-links { display: flex; gap: 3rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      padding: 12rem 4rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .hero-left {}
+
+    .hero-kana {
+      font-family: var(--serif);
+      font-size: 0.8rem;
+      font-weight: 200;
+      letter-spacing: 0.4em;
+      color: var(--dust);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-kana::before {
+      content: '';
+      width: 30px; height: 1px;
+      background: var(--dust);
+    }
+
+    .hero-h1 {
+      font-family: var(--serif);
+      font-size: clamp(3.5rem, 6vw, 6rem);
+      font-weight: 200;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+      margin-bottom: 3rem;
+    }
+
+    .hero-h1 em {
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .hero-h1 .stroke {
+      -webkit-text-stroke: 1px var(--ink);
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-p {
+      font-size: 0.95rem;
+      color: var(--stone);
+      max-width: 420px;
+      line-height: 1.9;
+      margin-bottom: 3rem;
+    }
+
+    .hero-links { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .hero-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .hero-link::before {
+      content: '';
+      width: 20px; height: 1px;
+      background: currentColor;
+      transition: width 0.3s;
+    }
+    .hero-link:hover { color: var(--accent); }
+    .hero-link:hover::before { width: 40px; }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .portrait-frame {
+      aspect-ratio: 3/4;
+      background: var(--whisper);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .portrait-frame::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(transparent, rgba(250,250,248,0.3));
+    }
+
+    .portrait-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--dust);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .portrait-placeholder svg { width: 60px; height: 60px; stroke: var(--whisper); fill: none; stroke-width: 0.5; }
+
+    .detail-box {
+      padding: 1.5rem;
+      border: 1px solid var(--whisper);
+    }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--whisper); }
+    .detail-row:last-child { border: none; padding-bottom: 0; }
+    .detail-key { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dust); }
+    .detail-val { font-family: var(--serif); font-size: 0.9rem; font-weight: 300; color: var(--ink); }
+
+    /* ── Sections ── */
+    section { padding: 7rem 4rem; }
+
+    .s-mark {
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .s-mark::after { content: ''; flex: 0 0 30px; height: 1px; background: var(--accent); }
+
+    .s-h {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 200;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .s-sub {
+      color: var(--stone);
+      font-size: 0.88rem;
+      max-width: 420px;
+      line-height: 1.9;
+      margin-bottom: 4rem;
+    }
+
+    /* ── About / Skills ── */
+    #about { border-top: 1px solid var(--whisper); }
+
+    .about-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .about-text p {
+      font-size: 0.9rem;
+      color: var(--stone);
+      line-height: 1.9;
+      margin-bottom: 1.2rem;
+    }
+    .about-text strong { color: var(--ink); font-weight: 500; }
+
+    .divider {
+      width: 40px; height: 1px;
+      background: var(--accent);
+      margin: 2rem 0;
+    }
+
+    .skill-list { display: flex; flex-direction: column; gap: 0; }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--whisper);
+    }
+
+    .skill-item-left { display: flex; align-items: center; gap: 1rem; }
+
+    .skill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+    .skill-name-t { font-family: var(--serif); font-size: 1rem; font-weight: 300; }
+
+    .skill-dots { display: flex; gap: 3px; }
+    .sd { width: 5px; height: 5px; border-radius: 50%; background: var(--whisper); }
+    .sd.on { background: var(--ink); }
+
+    /* ── Projects ── */
+    #projects { border-top: 1px solid var(--whisper); }
+
+    .projects-4col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem 5rem;
+    }
+
+    .proj-item {}
+
+    .proj-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .proj-year { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--dust); }
+    .proj-num { font-family: var(--serif); font-size: 0.8rem; color: var(--dust); }
+
+    .proj-thumb {
+      aspect-ratio: 16/9;
+      background: var(--whisper);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--dust);
+      text-transform: uppercase;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.4s ease;
+    }
+
+    .proj-item:hover .proj-thumb { transform: scale(0.98); }
+
+    .proj-t { font-family: var(--serif); font-size: 1.3rem; font-weight: 300; margin-bottom: 0.5rem; }
+    .proj-d { font-size: 0.8rem; color: var(--stone); line-height: 1.7; margin-bottom: 1rem; }
+
+    .proj-links-row { display: flex; gap: 1.5rem; }
+    .proj-links-row a {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      border-bottom: 1px solid var(--whisper);
+      padding-bottom: 1px;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .proj-links-row a:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Contact ── */
+    #contact {
+      border-top: 1px solid var(--whisper);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .c-large-text {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 200;
+      line-height: 1.1;
+      margin-bottom: 2rem;
+    }
+
+    .c-email-link {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 200;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 2px;
+    }
+
+    .c-socials { display: flex; gap: 2rem; margin-top: 3rem; }
+    .c-soc {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dust);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .c-soc:hover { color: var(--ink); }
+
+    .c-form { display: flex; flex-direction: column; gap: 2rem; }
+
+    .cf-field { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cf-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--dust); }
+    .cf-in, .cf-ta {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--whisper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 300;
+      padding: 0.6rem 0;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .cf-in:focus, .cf-ta:focus { border-color: var(--accent); }
+    .cf-ta { resize: none; height: 80px; }
+
+    .cf-submit {
+      align-self: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: none;
+      border: none;
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      cursor: pointer;
+      transition: gap 0.3s;
+    }
+    .cf-submit::after { content: '→'; font-size: 1.2rem; transition: transform 0.3s; }
+    .cf-submit:hover { gap: 1.5rem; }
+
+    footer {
+      border-top: 1px solid var(--whisper);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--dust);
+    }
+
+    /* Anim */
+    .appear { opacity:0; transform:translateY(20px); transition: opacity 0.9s ease, transform 0.9s ease; }
+    .appear.show { opacity:1; transform:none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-mark">
+    Your Name
+    <small>Portfolio · 2024</small>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-left">
+    <p class="hero-kana">Developer &amp; Craftsman</p>
+    <h1 class="hero-h1">
+      Building for<br>
+      the <em>quiet</em><br>
+      <span class="stroke">web.</span>
+    </h1>
+    <p class="hero-p">I am a full-stack developer from Mumbai, India. I believe in the beauty of restraint — clean code, intentional design, and experiences that feel inevitable.</p>
+    <div class="hero-links">
+      <a href="#projects" class="hero-link">View My Work</a>
+      <a href="#contact" class="hero-link">Send a Message</a>
+      <a href="https://github.com/yourusername" target="_blank" class="hero-link">GitHub Profile</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="portrait-frame">
+      <!-- Replace with: <img src="photo.jpg" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"> -->
+      <div class="portrait-placeholder">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="37" r="20"/><path d="M12 92 Q22 68 50 65 Q78 68 88 92"/></svg>
+        Your Photograph
+      </div>
+    </div>
+    <div class="detail-box">
+      <div class="detail-row"><span class="detail-key">Role</span><span class="detail-val">Full-Stack Developer</span></div>
+      <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val">Mumbai, India</span></div>
+      <div class="detail-row"><span class="detail-key">Experience</span><span class="detail-val">3 Years</span></div>
+      <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val" style="color:var(--accent)">Available</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="about-2col">
+    <div class="about-text appear">
+      <p class="s-mark">Who I Am</p>
+      <h2 class="s-h">Made with<br>attention.</h2>
+      <div class="divider"></div>
+      <p>I'm <strong>Your Name</strong> — a developer who believes that software should be as thoughtful as it is functional. I approach every project as a craft, not just a task.</p>
+      <p>My work spans the full stack: from pixel-perfect frontends to robust, scalable backends. I'm currently open to new projects and full-time roles.</p>
+    </div>
+    <div class="appear" style="transition-delay:0.2s">
+      <p class="s-mark">Expertise</p>
+      <div class="skill-list">
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">HTML & CSS</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span></div></div>
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">JavaScript</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span></div></div>
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">React.js</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span></div></div>
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">Node.js</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span></div></div>
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">Python</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span></div></div>
+        <div class="skill-item"><div class="skill-item-left"><span class="skill-dot"></span><span class="skill-name-t">Figma / Design</span></div><div class="skill-dots"><span class="sd on"></span><span class="sd on"></span><span class="sd on"></span><span class="sd"></span><span class="sd"></span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <p class="s-mark appear">Selected Work</p>
+  <h2 class="s-h appear">Carefully built<br>things.</h2>
+  <p class="s-sub appear">A few projects I'm proud of — each one taught me something new.</p>
+  <div class="projects-4col">
+    <div class="proj-item appear">
+      <div class="proj-meta"><span class="proj-num">I</span><span class="proj-year">2024</span></div>
+      <div class="proj-thumb">Project Thumbnail</div>
+      <h3 class="proj-t">E-Commerce Platform</h3>
+      <p class="proj-d">Full-stack shopping app with Stripe payments, real-time inventory, and a refined admin interface.</p>
+      <div class="proj-links-row"><a href="#">Live →</a><a href="#">GitHub</a></div>
+    </div>
+    <div class="proj-item appear" style="transition-delay:0.12s">
+      <div class="proj-meta"><span class="proj-num">II</span><span class="proj-year">2023</span></div>
+      <div class="proj-thumb">Project Thumbnail</div>
+      <h3 class="proj-t">Weather Dashboard</h3>
+      <p class="proj-d">Quiet, elegant weather interface with location-aware forecasts and animated conditions.</p>
+      <div class="proj-links-row"><a href="#">Live →</a><a href="#">GitHub</a></div>
+    </div>
+    <div class="proj-item appear" style="transition-delay:0.24s">
+      <div class="proj-meta"><span class="proj-num">III</span><span class="proj-year">2023</span></div>
+      <div class="proj-thumb">Project Thumbnail</div>
+      <h3 class="proj-t">Task Manager</h3>
+      <p class="proj-d">Minimal Kanban productivity tool. Drag, drop, prioritise. Nothing extra.</p>
+      <div class="proj-links-row"><a href="#">Live →</a><a href="#">GitHub</a></div>
+    </div>
+    <div class="proj-item appear" style="transition-delay:0.36s">
+      <div class="proj-meta"><span class="proj-num">IV</span><span class="proj-year">2022</span></div>
+      <div class="proj-thumb">Project Thumbnail</div>
+      <h3 class="proj-t">Developer Blog</h3>
+      <p class="proj-d">Personal writing space — MDX, clean typography, no noise.</p>
+      <div class="proj-links-row"><a href="#">Live →</a><a href="#">GitHub</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="appear">
+    <p class="s-mark">Reach Out</p>
+    <h2 class="c-large-text">Let's make<br>something<br>worthwhile.</h2>
+    <a href="mailto:your@email.com" class="c-email-link">your@email.com</a>
+    <div class="c-socials">
+      <a href="https://github.com/username" target="_blank" class="c-soc">GitHub</a>
+      <a href="https://linkedin.com/in/you" target="_blank" class="c-soc">LinkedIn</a>
+      <a href="https://twitter.com/you" target="_blank" class="c-soc">Twitter</a>
+    </div>
+  </div>
+  <div class="appear" style="transition-delay:0.15s">
+    <form class="c-form" onsubmit="e=>e.preventDefault()">
+      <div class="cf-field"><label class="cf-label">Your Name</label><input class="cf-in" type="text" placeholder="John Doe"/></div>
+      <div class="cf-field"><label class="cf-label">Email Address</label><input class="cf-in" type="email" placeholder="john@example.com"/></div>
+      <div class="cf-field"><label class="cf-label">Message</label><textarea class="cf-ta" placeholder="What are you working on?"></textarea></div>
+      <button class="cf-submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <span>© 2024 Your Name</span>
+  <span>Deployed on GitHub Pages</span>
+  <span>Mumbai, India</span>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(e => e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('show');obs.unobserve(x.target);}}),{threshold:0.08});
+  document.querySelectorAll('.appear').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
